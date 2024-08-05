@@ -68,6 +68,7 @@ class Kernel extends HttpKernel
         'dujiaoka.boot' => DujiaoBoot::class,
         'dujiaoka.pay_gate_way' => PayGateWay::class,
         'install.check' => InstallCheck::class,
+        'user.auth'=>\App\Http\Middleware\UserAuth::class,
     ];
 
     /**

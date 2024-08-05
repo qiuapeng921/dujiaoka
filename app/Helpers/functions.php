@@ -9,16 +9,19 @@
 
 
 use App\Exceptions\AppException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Redis;
 
-if (! function_exists('replace_mail_tpl')) {
+if (!function_exists('replace_mail_tpl')) {
 
     /**
      * 替换邮件模板
      *
      * @param array $mailtpl 模板
-     * @param array $data 内容
+     * @param array $data    内容
+     *
      * @return array|false|mixed
      *
      * @author    assimon<ashang@utf8.hk>
@@ -42,13 +45,14 @@ if (! function_exists('replace_mail_tpl')) {
 }
 
 
-if (! function_exists('dujiaoka_config_get')) {
+if (!function_exists('dujiaoka_config_get')) {
 
     /**
      * 系统配置获取
      *
-     * @param string $key 要获取的key
-     * @param $default 默认
+     * @param string $key     要获取的key
+     * @param        $default 默认
+     *
      * @return mixed|null
      *
      * @author    assimon<ashang@utf8.hk>
@@ -57,17 +61,18 @@ if (! function_exists('dujiaoka_config_get')) {
      */
     function dujiaoka_config_get(string $key, $default = null)
     {
-       $sysConfig = Cache::get('system-setting');
-       return $sysConfig[$key] ?? $default;
+        $sysConfig = Cache::get('system-setting');
+        return $sysConfig[$key] ?? $default;
     }
 }
 
-if (! function_exists('format_wholesale_price')) {
+if (!function_exists('format_wholesale_price')) {
 
     /**
      * 格式化批发价
      *
      * @param string $wholesalePriceArr 批发价配置
+     *
      * @return array|null
      *
      * @author    assimon<ashang@utf8.hk>
@@ -93,32 +98,35 @@ if (! function_exists('format_wholesale_price')) {
     }
 }
 
-if (! function_exists('delete_html_code')) {
+if (!function_exists('delete_html_code')) {
 
     /**
      * 去除html内容
+     *
      * @param string $str 需要去掉的字符串
+     *
      * @return string
      */
     function delete_html_code(string $str): string
     {
-        $str = trim($str); //清除字符串两边的空格
+        $str = trim($str);                     //清除字符串两边的空格
         $str = preg_replace("/\t/", "", $str); //使用正则表达式替换内容，如：空格，换行，并将替换为空。
         $str = preg_replace("/\r\n/", "", $str);
         $str = preg_replace("/\r/", "", $str);
         $str = preg_replace("/\n/", "", $str);
         $str = preg_replace("/ /", "", $str);
         $str = preg_replace("/  /", "", $str);  //匹配html中的空格
-        return trim($str); //返回字符串
+        return trim($str);                      //返回字符串
     }
 }
 
-if (! function_exists('format_charge_input')) {
+if (!function_exists('format_charge_input')) {
 
     /**
      * 格式化代充框
      *
      * @param string $charge
+     *
      * @return array|null
      *
      * @author    assimon<ashang@utf8.hk>
@@ -138,9 +146,9 @@ if (! function_exists('format_charge_input')) {
                 $formatData[$key]['field'] = $explodeFormat[0];
                 $formatData[$key]['desc'] = $explodeFormat[1];
                 $formatData[$key]['rule'] = filter_var($explodeFormat[2], FILTER_VALIDATE_BOOLEAN);
-                if(count($explodeFormat) > 3){
+                if (count($explodeFormat) > 3) {
                     $formatData[$key]['placeholder'] = $explodeFormat[3];
-                }else{
+                } else {
                     $formatData[$key]['placeholder'] = $formatData[$key]['desc'];
                 }
             }
@@ -149,7 +157,7 @@ if (! function_exists('format_charge_input')) {
     }
 }
 
-if (! function_exists('site_url')) {
+if (!function_exists('site_url')) {
 
     /**
      * 获取顶级域名 带协议
@@ -163,7 +171,7 @@ if (! function_exists('site_url')) {
     }
 }
 
-if (! function_exists('md5_signquery')) {
+if (!function_exists('md5_signquery')) {
 
     function md5_signquery(array $parameter, string $signKey)
     {
@@ -178,27 +186,27 @@ if (! function_exists('md5_signquery')) {
                     $sign .= "&";
                     $urls .= "&";
                 }
-                $sign .= "$key=$val"; //拼接为url参数形式
+                $sign .= "$key=$val";               //拼接为url参数形式
                 $urls .= "$key=" . urlencode($val); //拼接为url参数形式
             }
         }
-        $sign = md5($sign . $signKey);//密码追加进入开始MD5签名
+        $sign = md5($sign . $signKey);     //密码追加进入开始MD5签名
         $query = $urls . '&sign=' . $sign; //创建订单所需的参数
         return $query;
     }
 }
 
-if (! function_exists('signquery_string')) {
+if (!function_exists('signquery_string')) {
 
     function signquery_string(array $data)
     {
         ksort($data); //排序post参数
         reset($data); //内部指针指向数组中的第一个元素
-        $sign = ''; //加密字符串初始化
+        $sign = '';   //加密字符串初始化
         foreach ($data as $key => $val) {
             if ($val == '' || $key == 'sign') continue; //跳过这些不签名
-            if ($sign) $sign .= '&'; //第一个字符串签名不加& 其他加&连接起来参数
-            $sign .= "$key=$val"; //拼接为url参数形式
+            if ($sign) $sign .= '&';                    //第一个字符串签名不加& 其他加&连接起来参数
+            $sign .= "$key=$val";                       //拼接为url参数形式
         }
         return $sign;
     }
@@ -208,8 +216,10 @@ if (!function_exists('picture_ulr')) {
 
     /**
      * 生成前台图片链接 不存在使用默认图
-     * @param string $file 图片地址
-     * @param false $getHost 是否只获取图片前缀域名
+     *
+     * @param string $file    图片地址
+     * @param false  $getHost 是否只获取图片前缀域名
+     *
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\UrlGenerator|string
      */
     function picture_ulr($file, $getHost = false)
@@ -232,5 +242,49 @@ if (!function_exists('assoc_unique')) {
         }
         sort($arr); //sort函数对数组进行排序
         return $arr;
+    }
+}
+
+if (!function_exists('respSuccess')) {
+    /**
+     * @param array  $data
+     * @param int    $code
+     * @param string $msg
+     *
+     * @return JsonResponse
+     */
+    function respSuccess(array $data = [], int $code = 200, string $msg = 'success'): JsonResponse
+    {
+        return response()->json([
+            'msg'  => $msg,
+            'code' => $code,
+            'data' => $data,
+        ]);
+    }
+}
+
+if (!function_exists('respError')) {
+    /**
+     * @param string $msg
+     * @param int    $code
+     *
+     * @return JsonResponse
+     */
+    function respError(string $msg, int $code = 10000): JsonResponse
+    {
+        return response()->json([
+            'msg'  => $msg,
+            'code' => $code
+        ]);
+    }
+}
+
+if (!function_exists('redisClient')) {
+    /**
+     * @return mixed|\Redis
+     */
+    function redisClient()
+    {
+        return Redis::connection()->client();
     }
 }

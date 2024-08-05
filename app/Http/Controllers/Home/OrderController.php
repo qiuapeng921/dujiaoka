@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Home;
 
+use App\Service\CreateOrderService;
 use App\Exceptions\RuleValidationException;
 use App\Http\Controllers\BaseController;
 use App\Models\Order;
@@ -56,35 +57,14 @@ class OrderController extends BaseController
      */
     public function createOrder(Request $request)
     {
+        $createOrderService = new CreateOrderService($this->orderService, $this->orderProcessService);
         DB::beginTransaction();
         try {
-            $this->orderService->validatorCreateOrder($request);
-            $goods = $this->orderService->validatorGoods($request);
-            $this->orderService->validatorLoopCarmis($request);
-            // 设置商品
-            $this->orderProcessService->setGoods($goods);
-            // 优惠码
-            $coupon = $this->orderService->validatorCoupon($request);
-            // 设置优惠码
-            $this->orderProcessService->setCoupon($coupon);
-            $otherIpt = $this->orderService->validatorChargeInput($goods, $request);
-            $this->orderProcessService->setOtherIpt($otherIpt);
-            // 数量
-            $this->orderProcessService->setBuyAmount($request->input('by_amount'));
-            // 支付方式
-            $this->orderProcessService->setPayID($request->input('payway'));
-            // 下单邮箱
-            $this->orderProcessService->setEmail($request->input('email'));
-            // ip地址
-            $this->orderProcessService->setBuyIP($request->getClientIp());
-            // 查询密码
-            $this->orderProcessService->setSearchPwd($request->input('search_pwd', ''));
-            // 创建订单
-            $order = $this->orderProcessService->createOrder();
+            $orderSn = $createOrderService->createOrder($request);
             DB::commit();
             // 设置订单cookie
-            $this->queueCookie($order->order_sn);
-            return redirect(url('/bill', ['orderSN' => $order->order_sn]));
+            $this->queueCookie($orderSn);
+            return redirect(url('/bill', ['orderSN' => $orderSn]));
         } catch (RuleValidationException $exception) {
             DB::rollBack();
             return $this->err($exception->getMessage());
