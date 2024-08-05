@@ -73,9 +73,11 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'username' => 'required',
             'password' => 'required',
+            'mac'      => 'required',
         ], [
             'username.required' => "账号必填",
-            'password.integer'  => "密码必填",
+            'password.required' => "密码必填",
+            'mac.required'      => "mac必填",
         ]);
         if ($validator->fails()) {
             return respError($validator->errors()->first());
@@ -95,7 +97,12 @@ class AuthController extends Controller
             "password" => $password,
         ]);
 
-        OperateBalance::dispatch($userId, 1);
+        $mac = $request->input('mac');
+        // 判断机器码是否已注册过,注册过不送积分
+        $macExists = Users::query()->where("mac", $mac)->exists();
+        if (!$macExists) {
+            OperateBalance::dispatch($userId, 1);
+        }
 
         return respSuccess();
     }
