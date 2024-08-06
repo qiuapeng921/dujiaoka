@@ -17,7 +17,7 @@ class GoodsController extends BaseController
      */
     public function list(): JsonResponse
     {
-        $goodsList = Goods::query()->get()->toArray();
+        $goodsList = Goods::query()->where('is_open',1)->orderByDesc('ord')->get()->toArray();
         return respSuccess($goodsList);
     }
 }
