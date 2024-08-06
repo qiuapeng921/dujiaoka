@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Home;
 
+use App\Models\AppVersion;
+use Illuminate\Http\JsonResponse;
 use App\Exceptions\RuleValidationException;
 use App\Http\Controllers\BaseController;
 use App\Models\Pay;
 use Germey\Geetest\Geetest;
-use Illuminate\Database\DatabaseServiceProvider;
 use Illuminate\Database\QueryException;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Http\Request;
@@ -97,7 +98,7 @@ class HomeController extends BaseController
         $data = [
             'user_id' => @Auth::user()?@Auth::user()->id:'UnLoginUser',
             'client_type' => 'web',
-            'ip_address' => \Illuminate\Support\Facades\Request::ip()
+            'ip_address' => \Illuminate\Support\Facades\Request::ip(),
         ];
         $status = Geetest::preProcess($data);
         session()->put('gtserver', $status);
@@ -185,5 +186,16 @@ class HomeController extends BaseController
         }
     }
 
+    /**
+     * 检测软件更新
+     * @param string $type
+     *
+     * @return JsonResponse
+     */
+    public function checkUpgrade(string $type): JsonResponse
+    {
+        $result = AppVersion::query()->where('type', $type)->first();
 
+        return respSuccess($result ? $result->toArray() : []);
+    }
 }

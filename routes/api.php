@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::group(['namespace' => 'Home'], function () {
+    Route::get('checkUpgrade/{type}', 'HomeController@checkUpgrade');
 
     Route::group(['prefix' => 'user'], function () {
         Route::post('login', 'AuthController@login');
