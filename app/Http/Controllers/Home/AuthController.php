@@ -95,6 +95,8 @@ class AuthController extends Controller
         $userId = Users::query()->insertGetId([
             "username" => $username,
             "password" => $password,
+            "created_at"=> date("Y-m-d H:i:s"),
+            "updated_at"=> date("Y-m-d H:i:s"),
         ]);
 
         $mac = $request->input('mac');

@@ -102,6 +102,8 @@ class OperateBalance implements ShouldQueue
                         'after_balance'  => $user['balance'] + $value,
                         'type'           => 1,
                         'remark'         => '新用户注册则送积分',
+                        'created_at'     => date("Y-m-d H:i:s"),
+                        'updated_at'     => date("Y-m-d H:i:s"),
                     ]);
                     DB::commit();
                 } catch (\Exception $exception) {
@@ -128,6 +130,8 @@ class OperateBalance implements ShouldQueue
                     'after_balance'  => $user['balance'] + $this->balance,
                     'type'           => 1,
                     'remark'         => $this->remark,
+                    'created_at'     => date("Y-m-d H:i:s"),
+                    'updated_at'     => date("Y-m-d H:i:s"),
                 ]);
             } else {
                 // 减少用户积分
@@ -138,6 +142,8 @@ class OperateBalance implements ShouldQueue
                     'after_balance'  => $user['balance'] - $this->balance,
                     'type'           => 0,
                     'remark'         => $this->remark,
+                    'created_at'     => date("Y-m-d H:i:s"),
+                    'updated_at'     => date("Y-m-d H:i:s"),
                 ]);
             }
 
